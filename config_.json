@@ -1,0 +1,13 @@
+{
+  "BeforePath": "元の画像の保存場所",
+  "AfterPath": "画像が格納されるフォルダの一つ上のパス",
+  "ImageExtension": [
+    "画像判定用の拡張子のリスト",
+    "jpg",
+    "png",
+    "gif"
+  ],
+
+  "PlotImagePath": "graphの保存先",
+  "GraphLimit": 7
+}
