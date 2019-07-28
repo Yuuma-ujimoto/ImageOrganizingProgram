@@ -9,8 +9,11 @@ import datetime
 import json
 import os
 import shutil
+
 import matplotlib.pyplot as plot
 import numpy
+
+
 # インポート終わり
 
 
@@ -32,9 +35,9 @@ def save_log(
 def get_time_stamp():
     now = datetime.datetime.now()
     time_stamp: str = "{hour}_{minute}_{second}_{micro_second}".format(
-        hour="0"+str(now.hour) if int(now.hour) < 10 else str(now.hour),
-        minute="0"+str(now.minute) if int(now.minute) < 10 else str(now.minute),
-        second="0"+str(now.second) if int(now.second) < 10 else str(now.second),
+        hour="0" + str(now.hour) if int(now.hour) < 10 else str(now.hour),
+        minute="0" + str(now.minute) if int(now.minute) < 10 else str(now.minute),
+        second="0" + str(now.second) if int(now.second) < 10 else str(now.second),
         micro_second=str(now.microsecond)
     )
     return time_stamp
@@ -64,6 +67,8 @@ def check_image(
         image_extension: list
 ):
     return file_name.split(".")[-1] in image_extension
+
+
 # 必要な関数の記述終わり
 
 #########################################
@@ -98,38 +103,40 @@ error_check(error_occurred=m_error_occurred)
 lcj_before_path = m_config_data["BeforePath"]
 lcj_after_path = m_config_data["AfterPath"]
 lcj_image_extension: list = m_config_data["ImageExtension"]
+lcj_create_dateFolder_if_0_image = m_config_data["CreateDateFolderIF0img"]
 # END:lcj
 
 # MakeDateFolder:mk
 mi_file_list: list = os.listdir(path=lcj_before_path)
-mi_date_folder_path = "{0}\\{1}".format(lcj_after_path, get_date_data())
-if not os.path.exists(path=mi_date_folder_path):
-    try:
-        os.mkdir(path=mi_date_folder_path)
-        m_log_message = "{time_stamp}:MoveImage/MakeDateFolder:{folder_name}\n".format(
-            time_stamp=get_time_stamp(),
-            folder_name=get_date_data()
-        )
-        save_log(log_folder_path=m_log_folder_path, log_message=m_log_message)
+mk_date_folder_path = "{0}\\{1}".format(lcj_after_path, get_date_data())
+# 保存されている画像が0枚でも日付フォルダーを生成するかを設定可能にした
+if len(mi_file_list) != 0 or lcj_create_dateFolder_if_0_image:
+    if not os.path.exists(path=mk_date_folder_path):
+        try:
+            os.mkdir(path=mk_date_folder_path)
+            m_log_message = "{time_stamp}:MoveImage/MakeDateFolder:{folder_name}\n".format(
+                time_stamp=get_time_stamp(),
+                folder_name=get_date_data()
+            )
+            save_log(log_folder_path=m_log_folder_path, log_message=m_log_message)
 
-    except Exception as im_md_error:
-        m_log_message = "{time_stamp}:Error:MoveImage/MakeDateFolder:{error}\n".format(
-            error=im_md_error,
-            time_stamp=get_time_stamp()
-        )
-        save_log(log_folder_path=m_log_folder_path, log_message=m_log_message)
-        m_error_occurred = True
-    error_check(error_occurred=m_error_occurred)
-# END:mk
+        except Exception as im_md_error:
+            m_log_message = "{time_stamp}:Error:MoveImage/MakeDateFolder:{error}\n".format(
+                error=im_md_error,
+                time_stamp=get_time_stamp()
+            )
+            save_log(log_folder_path=m_log_folder_path, log_message=m_log_message)
+            m_error_occurred = True
+        error_check(error_occurred=m_error_occurred)
+    # END:mk
 
 # MoveImage:mi
 for mi_image in mi_file_list:
     if check_image(file_name=mi_image, image_extension=lcj_image_extension):
         mi_image_path = "{0}\\{1}".format(lcj_before_path, mi_image)
         mi_all_folder_path = "{0}\\ALL".format(lcj_after_path)
-        mi_date_folder_path = "{0}\\{1}".format(lcj_after_path, get_date_data())
         mi_move_all_folder_path = "{0}\\{1}".format(mi_all_folder_path, mi_image)
-        mi_move_date_folder_path = "{0}\\{1}".format(mi_date_folder_path, mi_image)
+        mi_move_date_folder_path = "{0}\\{1}".format(mk_date_folder_path, mi_image)
         # MoveImage/RemoveFile:mi_rf
         if os.path.exists(path=mi_move_all_folder_path):
             try:
